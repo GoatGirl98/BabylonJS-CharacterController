@@ -1,4 +1,3 @@
-// delete extra function first
 var CharacterController = /** @class */ (function () {
     /**
      * The avatar/character can be made up of multiple meshes arranged in a hierarchy.
@@ -43,6 +42,9 @@ var CharacterController = /** @class */ (function () {
         this._actionMap = new ActionMap();
         this._cameraElastic = true;
         this._cameraTarget = BABYLON.Vector3.Zero();
+        // added myself : manual adjust camera
+        this._cameraManualControl = true;
+
         //should we go into first person view when camera is near avatar (radius is lowerradius limit)
         this._noFirstPerson = false;
         /**
@@ -438,6 +440,7 @@ var CharacterController = /** @class */ (function () {
             anim.rate = rate;
     };
     /**
+     * set how smmothly should we transition from one animation to another
      * @param {number} n 
      */
     CharacterController.prototype.enableBlending = function (n) {
@@ -921,6 +924,8 @@ var CharacterController = /** @class */ (function () {
     CharacterController.prototype._isAvFacingCamera = function () {
         if (!this._hasCam)
             return 1;
+        if (this._mode == 0)
+            return -1;
         if (BABYLON.Vector3.Dot(this._avatar.forward, this._avatar.position.subtract(this._camera.position)) < 0)
             return 1;
         else
@@ -1587,6 +1592,28 @@ var CharacterController = /** @class */ (function () {
             }
         }
     };
+
+    CharacterController.prototype.enableCameraControl = function() {
+        if (this._cameraManualControl == false) {
+            this._cameraManualControl = true;
+            for (const i in this._camera.inputs.attached) {
+                const input = this._camera.inputs.attached[i];
+                this._camera.inputs.attachInput(input);
+            }
+        }
+    };
+
+    CharacterController.prototype.disableCameraControl = function() {
+        if (this._cameraManualControl == true) {
+            this._cameraManualControl = false;
+            for (const i in this._camera.inputs.attached) {
+                console.log(i);
+                const input = this._camera.inputs.attached[i];
+                input.detachControl();
+            }
+        }
+    };
+
     /**
      * how many ways can a mesh be invisible?
      * @param {AbstractMesh} mesh 
